@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { useAppDispatch, useAppSelector } from '../../hooks/use-store';
 import { Link, useNavigate } from 'react-router-dom';
 import { getAuthorizationStatus } from '../../store/user-process/selectors';
-import { AppRoute, AuthorizationStatus, PlaceCardType } from '../../const';
+import { AppRoute, AuthorizationStatus, PlaceCardType, RATING_MULTIPLIER } from '../../const';
 import { setFavoriteAction } from '../../store/api-actions';
 import { Offer } from '../../types/offer';
 
@@ -11,6 +11,12 @@ type PlaceCardProps = {
   onActiveCard: (id: string | null) => void;
   cardType: PlaceCardType;
 };
+const CardImageSize = {
+  [PlaceCardType.Favorites]: { width: 150, height: 110 },
+  [PlaceCardType.Cities]: { width: 260, height: 200 },
+  [PlaceCardType.NearPlaces]: { width: 260, height: 200 },
+} as const;
+
 
 export const PlaceCard = memo(
   ({ offer, onActiveCard, cardType }: PlaceCardProps) => {
@@ -21,8 +27,10 @@ export const PlaceCard = memo(
     const articleClassName = `${cardType}__card`;
     const imgWrapperClassName = `${cardType}__image-wrapper`;
 
-    const imgWidth = cardType === PlaceCardType.Favorites ? 150 : 260;
-    const imgHeight = cardType === PlaceCardType.Favorites ? 110 : 200;
+    const { width, height } = CardImageSize[cardType];
+
+    const imgWidth = width;
+    const imgHeight = height;
 
     const handleBookmarkClick = () => {
       if (authorizationStatus !== AuthorizationStatus.Auth) {
@@ -60,7 +68,7 @@ export const PlaceCard = memo(
               src={offer.previewImage}
               width={imgWidth}
               height={imgHeight}
-              alt="Place image"
+              alt={offer.title}
             />
           </Link>
         </div>
@@ -87,7 +95,7 @@ export const PlaceCard = memo(
           <div className="place-card__rating rating">
             <div className="place-card__stars rating__stars">
               <span
-                style={{ width: `${Math.round(offer.rating) * 20}%` }}
+                style={{ width: `${Math.round(offer.rating) * RATING_MULTIPLIER}%` }}
               >
               </span>
               <span className="visually-hidden">Rating</span>

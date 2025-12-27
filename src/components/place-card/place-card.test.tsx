@@ -7,7 +7,7 @@ import thunk from 'redux-thunk';
 import { PlaceCard } from './place-card';
 import { AuthorizationStatus, NameSpace, AppRoute, PlaceCardType } from '../../const';
 import { Offer } from '../../types/offer';
-// Импортируем сам экшен, чтобы использовать его тип
+
 import { setFavoriteAction } from '../../store/api-actions';
 
 const mockStore = configureMockStore([thunk]);

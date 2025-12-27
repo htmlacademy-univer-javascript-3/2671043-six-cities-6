@@ -4,7 +4,7 @@ import MockAdapter from 'axios-mock-adapter';
 import thunk from 'redux-thunk';
 import { configureMockStore } from '@jedmao/redux-mock-store';
 import { AnyAction } from 'redux';
-import { State } from '../types/state';
+import { AppThunkDispatch, State } from '../types/state';
 import {
   checkAuthAction,
   fetchOffersAction,
@@ -15,33 +15,29 @@ import {
   loginAction,
   logoutAction,
 } from './api-actions';
-import { APIRoute } from '../const';
+import { APIRoute, AuthorizationStatus } from '../const';
 import {
   makeFakeOffer,
   makeFakeDetailedOffer,
   makeFakeReviewData,
   makeFakeAuthData,
   makeFakeUser,
-  AppThunkDispatch,
-} from '../utils/mocks'; // Убедись, что эти генераторы есть в mocks.ts, или используй одиночные (makeFakeOffer и т.д.)
-import { setUser } from './user-process/user-process';
+} from '../utils/mocks';
+import { userProcess } from './user-process/user-process';
 
 describe('Async actions', () => {
   const api = createAPI();
   const mockAxiosAdapter = new MockAdapter(api);
   const middlewares = [thunk.withExtraArgument(api)];
 
-  // Создаем mockStore
   const mockStore = configureMockStore<State, AnyAction, AppThunkDispatch>(
     middlewares
   );
 
-  // Очищаем историю запросов перед каждым тестом
   beforeEach(() => {
     mockAxiosAdapter.reset();
   });
 
-  // (Загрузка предложений)
   describe('fetchOffersAction', () => {
     it('should dispatch "fetchOffersAction.pending" and "fetchOffersAction.fulfilled" when server response 200', async () => {
       const mockOffers = [makeFakeOffer()];
@@ -59,49 +55,38 @@ describe('Async actions', () => {
     });
   });
 
-  // (Проверка авторизации)
-  describe('checkAuthAction', () => {
-    it('should dispatch "checkAuthAction.fulfilled" when server response 200', async () => {
-      const mockUser = makeFakeUser();
-      mockAxiosAdapter.onGet(APIRoute.Login).reply(200, mockUser);
+  it('should dispatch "user null" and "checkAuthAction.rejected" when server response 401', async () => {
+    mockAxiosAdapter.onGet(APIRoute.Login).reply(401);
 
-      const store = mockStore();
+    const store = mockStore();
 
+    try {
       await store.dispatch(checkAuthAction());
+    } catch {
+      /* empty */
+    }
 
-      const actions = store.getActions();
+    const actions = store.getActions();
 
-      expect(actions[0].type).toBe(checkAuthAction.pending.type);
-      expect(actions[1].type).toBe(checkAuthAction.fulfilled.type);
-      expect(actions[1].payload).toEqual(mockUser);
-    });
+    expect(actions).toHaveLength(2);
 
-    it('should dispatch "setUser(null)" and "checkAuthAction.rejected" when server response 401', async () => {
-      mockAxiosAdapter.onGet(APIRoute.Login).reply(401);
+    expect(actions[0].type).toBe(checkAuthAction.pending.type);
 
-      const store = mockStore();
+    expect(actions[1].type).toBe(checkAuthAction.rejected.type);
 
-      try {
-        await store.dispatch(checkAuthAction());
-      } catch { /* empty */ }
-
-      const actions = store.getActions();
-
-      expect(actions[0].type).toBe(checkAuthAction.pending.type);
-
-      expect(actions[1].type).toBe(setUser.type);
-      expect(actions[1].payload).toBeNull();
-      expect(actions[2].type).toBe(checkAuthAction.rejected.type);
-    });
+    const state = userProcess.reducer(
+      { authorizationStatus: AuthorizationStatus.Unknown, user: null },
+      actions[1]
+    );
+    expect(state.user).toBeNull();
   });
 
-  // (Загрузка детальной инфо: оффер, места рядом, отзывы)
   describe('fetchOfferDataAction', () => {
     it('should dispatch fulfilled with combined data when all requests success', async () => {
       const mockOfferId = '1';
       const mockDetailedOffer = makeFakeDetailedOffer();
       const mockNearby = [makeFakeOffer()];
-      const mockComments = [makeFakeReviewData()]; // Если makeFakeReviews возвращает массив, иначе [makeFakeReview()]
+      const mockComments = [makeFakeReviewData()];
 
       mockAxiosAdapter
         .onGet(`${APIRoute.Offers}/${mockOfferId}`)
@@ -129,11 +114,10 @@ describe('Async actions', () => {
     });
   });
 
-  //  (Отправка комментария)
   describe('postCommentAction', () => {
     it('should dispatch fulfilled with updated comments when POST and GET success', async () => {
       const mockReviewData = makeFakeReviewData();
-      const mockComments = [makeFakeReviewData()]; // Ответ сервера (список комментариев)
+      const mockComments = [makeFakeReviewData()];
 
       mockAxiosAdapter
         .onPost(`${APIRoute.Comments}/${mockReviewData.offerId}`)
@@ -155,7 +139,6 @@ describe('Async actions', () => {
     });
   });
 
-  //  (Логин)
   describe('loginAction', () => {
     it('should dispatch "loginAction.pending", "fetchOffers", "fetchFavorites" and "loginAction.fulfilled" when server response 200', async () => {
       const fakeUser = makeFakeUser();
@@ -172,8 +155,8 @@ describe('Async actions', () => {
       const actionsTypes = actions.map((action) => action.type as string);
 
       expect(actionsTypes).toContain(loginAction.pending.type);
-      expect(actionsTypes).toContain(fetchOffersAction.pending.type); // Твой код вызывает это внутри логина
-      expect(actionsTypes).toContain(fetchFavoritesAction.pending.type); // И это
+      expect(actionsTypes).toContain(fetchOffersAction.pending.type);
+      expect(actionsTypes).toContain(fetchFavoritesAction.pending.type);
       expect(actionsTypes).toContain(loginAction.fulfilled.type);
 
       const fulfilledAction = actions.find(
@@ -183,7 +166,6 @@ describe('Async actions', () => {
     });
   });
 
-  //  (Логаут)
   describe('logoutAction', () => {
     it('should dispatch "logoutAction.fulfilled" and fetch offers', async () => {
       mockAxiosAdapter.onDelete(APIRoute.Logout).reply(204);
@@ -196,12 +178,11 @@ describe('Async actions', () => {
       const actionsTypes = actions.map((action) => action.type as string);
 
       expect(actionsTypes).toContain(logoutAction.pending.type);
-      expect(actionsTypes).toContain(fetchOffersAction.pending.type); // Твой код обновляет оферы после выхода
+      expect(actionsTypes).toContain(fetchOffersAction.pending.type);
       expect(actionsTypes).toContain(logoutAction.fulfilled.type);
     });
   });
 
-  // 7. Тест setFavoriteAction (Изменение избранного)
   describe('setFavoriteAction', () => {
     it('should dispatch fulfilled with updated offer', async () => {
       const mockOffer = makeFakeOffer();

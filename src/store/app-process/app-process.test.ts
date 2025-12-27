@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { appProcess, changeCity, changeSort, setError } from './app-process';
+import { appProcess, changeCity, changeSort } from './app-process';
 import { CITY_DEFAULT, SortOption } from '../../const';
 
 describe('AppProcess Slice', () => {
@@ -8,7 +8,6 @@ describe('AppProcess Slice', () => {
     const expectedState = {
       cityActive: CITY_DEFAULT,
       currentSortOption: SortOption.Popular,
-      error: null,
     };
 
     const result = appProcess.reducer(undefined, emptyAction);
@@ -20,7 +19,6 @@ describe('AppProcess Slice', () => {
     const initialState = {
       cityActive: CITY_DEFAULT,
       currentSortOption: SortOption.Popular,
-      error: null,
     };
     const newCity = 'Hamburg';
 
@@ -33,25 +31,11 @@ describe('AppProcess Slice', () => {
     const initialState = {
       cityActive: CITY_DEFAULT,
       currentSortOption: SortOption.Popular,
-      error: null,
     };
     const newSort = SortOption.PriceLowToHigh;
 
     const result = appProcess.reducer(initialState, changeSort(newSort));
 
     expect(result.currentSortOption).toBe(newSort);
-  });
-
-  it('should set error with "setError" action', () => {
-    const initialState = {
-      cityActive: CITY_DEFAULT,
-      currentSortOption: SortOption.Popular,
-      error: null,
-    };
-    const errorText = 'Something went wrong';
-
-    const result = appProcess.reducer(initialState, setError(errorText));
-
-    expect(result.error).toBe(errorText);
   });
 });

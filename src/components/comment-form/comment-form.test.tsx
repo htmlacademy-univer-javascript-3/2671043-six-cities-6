@@ -4,6 +4,7 @@ import { Provider } from 'react-redux';
 import { configureMockStore } from '@jedmao/redux-mock-store';
 import thunk from 'redux-thunk';
 import { CommentForm } from './comment-form';
+import { vi } from 'vitest';
 
 const middlewares = [thunk];
 const mockStore = configureMockStore(middlewares);

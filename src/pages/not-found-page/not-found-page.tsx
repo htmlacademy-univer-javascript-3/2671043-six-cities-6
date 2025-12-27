@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Header } from '../../components/header/header';
+import { AppRoute } from '../../const';
 
 export const NotFoundPage = () => (
   <div className="page page--gray page--login">
@@ -12,7 +13,7 @@ export const NotFoundPage = () => (
 
           <img className="login__image" src="img/404.png" alt="404" />
 
-          <Link to="/">Вернуться на главную</Link>
+          <Link to={AppRoute.Main}>Вернуться на главную</Link>
         </section>
       </div>
     </main>

@@ -1,7 +1,7 @@
-import { render } from '@testing-library/react';
+
 import { MapOffers } from './map-offers';
 import { City, Offer } from '../../types/offer';
-
+import { render, screen } from '@testing-library/react';
 
 vi.mock('../../hooks/use-map', () => ({
   useMap: () => null,
@@ -27,7 +27,6 @@ describe('Component: MapOffers', () => {
       />
     );
 
-    const mapElement = document.querySelector('.cities__map');
-    expect(mapElement).toBeInTheDocument();
+    expect(screen.getByTestId('map')).toBeInTheDocument();
   });
 });

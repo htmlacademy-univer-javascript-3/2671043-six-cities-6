@@ -29,7 +29,7 @@ export const PlacesSorting = memo(({
       <span
         className="places__sorting-type"
         tabIndex={0}
-        onClick={handleTypeClick} // Вешаем обработчик
+        onClick={handleTypeClick}
       >
         {currentSort}
         <svg className="places__sorting-arrow" width="7" height="4">

@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { MainEmpty } from './main-empty'; // Проверь путь
+import { MainEmpty } from './main-empty';
 
 describe('Component: MainEmpty', () => {
   it('should render correctly with given city', () => {

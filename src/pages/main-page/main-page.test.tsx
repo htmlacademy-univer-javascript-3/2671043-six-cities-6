@@ -5,7 +5,7 @@ import { configureMockStore } from '@jedmao/redux-mock-store';
 import { MainPage } from './main-page';
 import { NameSpace, AuthorizationStatus, SortOption } from '../../const';
 
-// Мокаем карту
+
 vi.mock('../../components/map-offers/map-offers', () => ({
   MapOffers: () => <div data-testid="map-offers" />,
 }));

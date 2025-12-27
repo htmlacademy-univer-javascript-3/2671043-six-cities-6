@@ -1,4 +1,3 @@
-//единый стиль перечисления потом передалть !
 export enum AppRoute {
   Main = '/',
   Login = '/login',
@@ -18,8 +17,10 @@ export enum HousingType {
   Room = 'room',
 }
 
-export const MIN_COMMENT_LENGTH = 50;
-export const MAX_COMMENT_LENGTH = 300;
+export const CommentLength = {
+  Min: 50,
+  Max: 300,
+} as const;
 
 export const RatingMap = {
   '5': 'perfect',
@@ -29,20 +30,18 @@ export const RatingMap = {
   '1': 'terribly',
 } as const;
 
-export const URL_MARKER_DEFAULT =
-  'https://assets.htmlacademy.ru/content/intensive/javascript-1/demo/interactive-map/pin.svg';
-export const URL_MARKER_CURRENT =
-  'https://assets.htmlacademy.ru/content/intensive/javascript-1/demo/interactive-map/main-pin.svg';
-
 export const MapIcon = {
-  Default: URL_MARKER_DEFAULT,
-  Active: URL_MARKER_CURRENT,
+  Default:
+    'https://assets.htmlacademy.ru/content/intensive/javascript-1/demo/interactive-map/pin.svg',
+  Active:
+    'https://assets.htmlacademy.ru/content/intensive/javascript-1/demo/interactive-map/main-pin.svg',
 } as const;
 
-export const MAP_URL_TEMPLATE =
-  'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-export const MAP_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+export const MapConfig = {
+  MapUrlTemplate: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+  MapAttribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+} as const;
+
 
 export enum PlaceCardType {
   Cities = 'cities',
@@ -80,5 +79,6 @@ export enum NameSpace {
   User = 'USER',
   Data = 'DATA',
   App = 'APP',
-  NameSpace = 'NameSpace',
 }
+
+export const RATING_MULTIPLIER = 20;

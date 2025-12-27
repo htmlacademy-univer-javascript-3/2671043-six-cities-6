@@ -3,14 +3,14 @@ import { PlaceCardType } from '../../const';
 import { Offer } from '../../types/offer';
 import { PlaceCard } from '../place-card/place-card';
 
-type OfferListProp = {
+type OfferListProps = {
   offers: Offer[];
   onActiveCard: (id: string | null) => void;
   cardType: PlaceCardType;
 };
 
 export const OfferList = memo(
-  ({ offers, onActiveCard, cardType }: OfferListProp) => (
+  ({ offers, onActiveCard, cardType }: OfferListProps) => (
     <>
       {offers.map((offer) => (
         <PlaceCard

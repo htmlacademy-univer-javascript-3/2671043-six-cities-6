@@ -4,12 +4,20 @@ import { MapOffers } from '../../components/map-offers/map-offers';
 import { OfferList } from '../../components/offers-list/offers-list';
 import { ReviewList } from '../../components/review-list/review-list';
 
-import { AuthorizationStatus, PlaceCardType } from '../../const';
+import {
+  AppRoute,
+  AuthorizationStatus,
+  PlaceCardType,
+  RATING_MULTIPLIER,
+} from '../../const';
 import { Header } from '../../components/header/header';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../hooks/use-store';
-import { fetchOfferDataAction } from '../../store/api-actions';
-import LoadingScreen from '../../components/loading-screen/loading-screen';
+import {
+  fetchOfferDataAction,
+  setFavoriteAction,
+} from '../../store/api-actions';
+
 import { NotFoundPage } from '../not-found-page/not-found-page';
 import {
   getComments,
@@ -20,6 +28,12 @@ import {
 } from '../../store/app-data/selectors';
 import { getAuthorizationStatus } from '../../store/user-process/selectors';
 import { Offer } from '../../types/offer';
+import { LoadingScreen } from '../../components/loading-screen/loading-screen';
+import { clearOfferData } from '../../store/app-data/app-data';
+
+const MAX_IMAGES_COUNT = 6;
+const MAX_NEARBY_OFFERS_COUNT = 3;
+const MAX_REVIEWS_COUNT = 10;
 
 export const OfferPage = () => {
   const { id } = useParams();
@@ -34,12 +48,17 @@ export const OfferPage = () => {
   const hasError = useAppSelector(getErrorStatus);
   const authorizationStatus = useAppSelector(getAuthorizationStatus);
 
+  const navigate = useNavigate();
+
   const visibleImages = useMemo(
-    () => offer?.images.slice(0, 6),
+    () => offer?.images.slice(0, MAX_IMAGES_COUNT),
     [offer?.images]
   );
 
-  const visibleNearby = useMemo(() => nearbyOffers.slice(0, 3), [nearbyOffers]);
+  const visibleNearby = useMemo(
+    () => nearbyOffers.slice(0, MAX_NEARBY_OFFERS_COUNT),
+    [nearbyOffers]
+  );
 
   const mapOffers = useMemo(
     () => [...visibleNearby, { ...offer, previewImage: '' } as Offer],
@@ -49,17 +68,31 @@ export const OfferPage = () => {
     if (id) {
       dispatch(fetchOfferDataAction(id));
     }
+    return () => {
+      dispatch(clearOfferData());
+    };
   }, [id, dispatch]);
 
   const handleCardHover = useCallback((hoveredId: string | null) => {
     setActiveCardId(hoveredId);
   }, []);
 
+  const handleBookmarkClick = (offerId: string) => {
+    if (authorizationStatus !== AuthorizationStatus.Auth) {
+      navigate(AppRoute.Login);
+      return;
+    }
+    dispatch(
+      setFavoriteAction({
+        offerId,
+        status: offer?.isFavorite ? 0 : 1,
+      })
+    );
+  };
 
   if (hasError) {
     return <NotFoundPage />;
   }
-
 
   if (isOfferLoading || !offer) {
     return <LoadingScreen />;
@@ -67,7 +100,7 @@ export const OfferPage = () => {
 
   const sortedReviews = [...reviews]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 10);
+    .slice(0, MAX_REVIEWS_COUNT);
 
   return (
     <div className="page">
@@ -79,11 +112,7 @@ export const OfferPage = () => {
             <div className="offer__gallery">
               {visibleImages?.map((image) => (
                 <div className="offer__image-wrapper" key={image}>
-                  <img
-                    className="offer__image"
-                    src={image}
-                    alt="Photo studio"
-                  />
+                  <img className="offer__image" src={image} alt={offer.title} />
                 </div>
               ))}
             </div>
@@ -102,6 +131,7 @@ export const OfferPage = () => {
                     offer.isFavorite ? 'offer__bookmark-button--active' : ''
                   }`}
                   type="button"
+                  onClick={() => handleBookmarkClick(offer.id)}
                 >
                   <svg className="offer__bookmark-icon" width="31" height="33">
                     <use xlinkHref="#icon-bookmark"></use>
@@ -112,7 +142,9 @@ export const OfferPage = () => {
               <div className="offer__rating rating">
                 <div className="offer__stars rating__stars">
                   <span
-                    style={{ width: `${Math.round(offer.rating) * 20}%` }}
+                    style={{
+                      width: `${Math.round(offer.rating) * RATING_MULTIPLIER}%`,
+                    }}
                   >
                   </span>
                   <span className="visually-hidden">Rating</span>
@@ -126,10 +158,10 @@ export const OfferPage = () => {
                   {offer.type.charAt(0).toUpperCase() + offer.type.slice(1)}
                 </li>
                 <li className="offer__feature offer__feature--bedrooms">
-                  {offer.bedrooms} Bedrooms
+                  {offer.bedrooms} Bedroom{offer.bedrooms > 1 ? 's' : ''}
                 </li>
                 <li className="offer__feature offer__feature--adults">
-                  Max {offer.maxAdults} adults
+                  Max {offer.maxAdults} adult{offer.maxAdults > 1 ? 's' : ''}
                 </li>
               </ul>
               <div className="offer__price">
@@ -178,9 +210,7 @@ export const OfferPage = () => {
                   <span className="reviews__amount">{reviews.length}</span>
                 </h2>
 
-
                 <ReviewList reviews={sortedReviews} />
-
 
                 {authorizationStatus === AuthorizationStatus.Auth && (
                   <CommentForm offerId={offer.id} />

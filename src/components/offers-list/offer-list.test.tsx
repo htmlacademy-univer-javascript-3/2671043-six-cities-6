@@ -9,7 +9,7 @@ import { OfferList } from './offers-list';
 
 const mockStore = configureMockStore();
 
-// Создаем 2 фейковых оффера
+
 const mockOffers = [
   {
     id: '1',

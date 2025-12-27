@@ -1,12 +1,13 @@
-import { useState, ChangeEvent, FormEvent, Fragment } from 'react'; // Добавил FormEvent
-import { RatingMap, MIN_COMMENT_LENGTH, MAX_COMMENT_LENGTH } from '../../const';
-import { useAppDispatch } from '../../hooks/use-store';
-import { postCommentAction } from '../../store/api-actions'; // Импорт вашего экшена
-import { AxiosError } from 'axios';
+import { useState, ChangeEvent, FormEvent, Fragment } from 'react';
 
+import { useAppDispatch } from '../../hooks/use-store';
+import { postCommentAction } from '../../store/api-actions';
+import { AxiosError } from 'axios';
+import { CommentLength, RatingMap } from '../../const';
+import './comment-form.css';
 type CommentFormProps = {
   offerId: string;
-}
+};
 
 export const CommentForm = ({ offerId }: CommentFormProps) => {
   const dispatch = useAppDispatch();
@@ -16,11 +17,12 @@ export const CommentForm = ({ offerId }: CommentFormProps) => {
     review: '',
   });
 
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
-  const handleFormChange = (evt: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleFormChange = (
+    evt: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = evt.target;
     const parsedValue = name === 'rating' ? Number(value) : value;
 
@@ -28,7 +30,6 @@ export const CommentForm = ({ offerId }: CommentFormProps) => {
       ...formData,
       [name]: parsedValue,
     });
-
 
     if (serverError) {
       setServerError(null);
@@ -41,11 +42,13 @@ export const CommentForm = ({ offerId }: CommentFormProps) => {
     setIsSubmitting(true);
     setServerError(null);
 
-    dispatch(postCommentAction({
-      offerId,
-      comment: formData.review,
-      rating: formData.rating
-    }))
+    dispatch(
+      postCommentAction({
+        offerId,
+        comment: formData.review,
+        rating: formData.rating,
+      })
+    )
       .unwrap()
       .then(() => {
         setFormData({ rating: 0, review: '' });
@@ -60,7 +63,10 @@ export const CommentForm = ({ offerId }: CommentFormProps) => {
       });
   };
 
-  const isValid = formData.rating > 0 && formData.review.length >= MIN_COMMENT_LENGTH;
+  const isValid =
+    formData.rating > 0 &&
+    formData.review.length >= CommentLength.Min &&
+    formData.review.length <= CommentLength.Max;
 
   return (
     <form
@@ -69,43 +75,40 @@ export const CommentForm = ({ offerId }: CommentFormProps) => {
       method="post"
       onSubmit={handleSubmit}
     >
-      <label className="reviews__label form__label" htmlFor="review">Your review</label>
+      <label className="reviews__label form__label" htmlFor="review">
+        Your review
+      </label>
 
       {serverError && (
-        <div style={{
-          color: '#ff4d4d',
-          marginBottom: '10px',
-          fontSize: '14px'
-        }}
-        >
-          Error: {serverError}
-        </div>
+        <div className="reviews__error-message">Error: {serverError}</div>
       )}
 
       <div className="reviews__rating-form form__rating">
-        {Object.entries(RatingMap).reverse().map(([score, title]) => (
-          <Fragment key={score}>
-            <input
-              className="form__rating-input visually-hidden"
-              name="rating"
-              value={score}
-              id={`${score}-stars`}
-              type="radio"
-              onChange={handleFormChange}
-              checked={formData.rating === Number(score)}
-              disabled={isSubmitting}
-            />
-            <label
-              htmlFor={`${score}-stars`}
-              className="reviews__rating-label form__rating-label"
-              title={title}
-            >
-              <svg className="form__star-image" width="37" height="33">
-                <use xlinkHref="#icon-star"></use>
-              </svg>
-            </label>
-          </Fragment>
-        ))}
+        {Object.entries(RatingMap)
+          .reverse()
+          .map(([score, title]) => (
+            <Fragment key={score}>
+              <input
+                className="form__rating-input visually-hidden"
+                name="rating"
+                value={score}
+                id={`${score}-stars`}
+                type="radio"
+                onChange={handleFormChange}
+                checked={formData.rating === Number(score)}
+                disabled={isSubmitting}
+              />
+              <label
+                htmlFor={`${score}-stars`}
+                className="reviews__rating-label form__rating-label"
+                title={title}
+              >
+                <svg className="form__star-image" width="37" height="33">
+                  <use xlinkHref="#icon-star"></use>
+                </svg>
+              </label>
+            </Fragment>
+          ))}
       </div>
 
       <textarea
@@ -115,14 +118,18 @@ export const CommentForm = ({ offerId }: CommentFormProps) => {
         placeholder="Tell how was your stay, what you like and what can be improved"
         onChange={handleFormChange}
         value={formData.review}
-        maxLength={MAX_COMMENT_LENGTH}
+        maxLength={CommentLength.Max}
         disabled={isSubmitting}
       >
       </textarea>
 
       <div className="reviews__button-wrapper">
         <p className="reviews__help">
-          To submit review please make sure to set <span className="reviews__star">rating</span> and describe your stay with at least <b className="reviews__text-amount">{MIN_COMMENT_LENGTH} characters</b>.
+          To submit review please make sure to set{' '}
+          <span className="reviews__star">rating</span> and describe your stay
+          with at least{' '}
+          <b className="reviews__text-amount">{CommentLength.Min} characters</b>
+          .
         </p>
         <button
           className="reviews__submit form__submit button"

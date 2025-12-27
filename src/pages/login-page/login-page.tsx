@@ -1,21 +1,22 @@
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { Header } from '../../components/header/header';
-import { AppRoute, AuthorizationStatus } from '../../const';
+import { AppRoute, AuthorizationStatus, CITIES } from '../../const';
 import { useAppDispatch, useAppSelector } from '../../hooks/use-store';
 import { loginAction } from '../../store/api-actions';
-import { FormEvent, useRef } from 'react';
+import { FormEvent, useRef, useState } from 'react';
 import { getAuthorizationStatus } from '../../store/user-process/selectors';
-import { getError } from '../../store/app-process/selectors';
-
+import { changeCity } from '../../store/app-process/app-process';
+import { getRandomCity } from '../../utils/mocks';
+const PASSWORD_PATTERN = '(?=.*\\d)(?=.*[a-zA-Z])\\S+';
 export const LoginPage = () => {
   const loginRef = useRef<HTMLInputElement | null>(null);
   const passwordRef = useRef<HTMLInputElement | null>(null);
 
   const dispatch = useAppDispatch();
 
-
   const authorizationStatus = useAppSelector(getAuthorizationStatus);
-  const error = useAppSelector(getError);
+
+  const [randomCity] = useState(() => getRandomCity(CITIES));
 
   if (authorizationStatus === AuthorizationStatus.Auth) {
     return <Navigate to={AppRoute.Main} />;
@@ -42,23 +43,6 @@ export const LoginPage = () => {
         <div className="page__login-container container">
           <section className="login">
             <h1 className="login__title">Sign in</h1>
-            {error && (
-              <div
-                style={{
-                  padding: '5px',
-                  marginBottom: '20px',
-                  color: '#ff4d4d',
-                  backgroundColor: '#ffe6e6',
-                  border: '1px solid #ff4d4d',
-                  borderRadius: '5px',
-                  textAlign: 'center',
-                  width: '70%',
-
-                }}
-              >
-                {error}
-              </div>
-            )}
             <form
               className="login__form form"
               action="#"
@@ -85,6 +69,7 @@ export const LoginPage = () => {
                   placeholder="Password"
                   required
                   ref={passwordRef}
+                  pattern={PASSWORD_PATTERN}
                   title="Пароль должен содержать хотя бы одну цифру и букву и не должен содержать пробелы"
                 />
               </div>
@@ -98,9 +83,15 @@ export const LoginPage = () => {
           </section>
           <section className="locations locations--login locations--current">
             <div className="locations__item">
-              <a className="locations__item-link" href="#">
-                <span>Amsterdam</span>
-              </a>
+              <Link
+                className="locations__item-link"
+                to={AppRoute.Main}
+                onClick={() => {
+                  dispatch(changeCity(randomCity));
+                }}
+              >
+                <span>{randomCity}</span>
+              </Link>
             </div>
           </section>
         </div>

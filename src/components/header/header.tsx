@@ -6,10 +6,10 @@ import {
   getAuthorizationStatus,
   getUser,
 } from '../../store/user-process/selectors';
-import { memo, useEffect } from 'react';
+import { useEffect } from 'react';
 import { getFavoritesCount } from '../../store/app-data/selectors';
 
-export const Header = memo(() => {
+export const Header = () => {
   const { pathname } = useLocation();
   const dispatch = useAppDispatch();
 
@@ -57,7 +57,8 @@ export const Header = memo(() => {
                               ? `url(${user.avatarUrl})`
                               : '',
                           }}
-                        ></div>
+                        >
+                        </div>
                         <span className="header__user-name user__name">
                           {user ? user.email : ''}
                         </span>
@@ -97,6 +98,6 @@ export const Header = memo(() => {
       </div>
     </header>
   );
-});
+};
 
 Header.displayName = 'Header';

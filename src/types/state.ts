@@ -1,7 +1,14 @@
 
+import { Action, ThunkDispatch } from '@reduxjs/toolkit';
 import { store } from '../store';
+import { createAPI } from '../services/api';
 
-// State — это тип, который описывает всю структуру твоего хранилища
 export type State = ReturnType<typeof store.getState>;
-// AppDispatch — это тип для функции dispatch (чтобы отправлять действия)
+
 export type AppDispatch = typeof store.dispatch;
+
+export type AppThunkDispatch = ThunkDispatch<
+  State,
+  ReturnType<typeof createAPI>,
+  Action
+>;

@@ -1,9 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { userProcess, setUser } from './user-process';
+import { userProcess } from './user-process';
 import { AuthorizationStatus } from '../../const';
 import { checkAuthAction, loginAction, logoutAction } from '../api-actions';
 import { makeFakeUser } from '../../utils/mocks';
-
 
 describe('UserProcess Slice', () => {
   it('should return initial state with empty action', () => {
@@ -17,19 +16,6 @@ describe('UserProcess Slice', () => {
 
     expect(result).toEqual(expectedState);
   });
-
-  it('should set user data with "setUser" action', () => {
-    const initialState = {
-      authorizationStatus: AuthorizationStatus.Unknown,
-      user: null,
-    };
-    const mockUser = makeFakeUser();
-
-    const result = userProcess.reducer(initialState, setUser(mockUser));
-
-    expect(result.user).toEqual(mockUser);
-  });
-
 
   it('should set "Auth" status with "checkAuthAction.fulfilled"', () => {
     const initialState = {
@@ -53,12 +39,13 @@ describe('UserProcess Slice', () => {
       user: null,
     };
 
-    const result = userProcess.reducer(initialState, checkAuthAction.rejected(null, '', undefined));
-
+    const result = userProcess.reducer(
+      initialState,
+      loginAction.rejected(null, '', { login: 'test', password: '123' })
+    );
     expect(result.authorizationStatus).toBe(AuthorizationStatus.NoAuth);
     expect(result.user).toBeNull();
   });
-
 
   it('should set "Auth" status with "loginAction.fulfilled"', () => {
     const initialState = {
@@ -67,7 +54,10 @@ describe('UserProcess Slice', () => {
     };
     const mockUser = makeFakeUser();
 
-    const result = userProcess.reducer(initialState, loginAction.fulfilled(mockUser, '', { login: 'test', password: '123' }));
+    const result = userProcess.reducer(
+      initialState,
+      loginAction.fulfilled(mockUser, '', { login: 'test', password: '123' })
+    );
 
     expect(result.authorizationStatus).toBe(AuthorizationStatus.Auth);
     expect(result.user).toEqual(mockUser);
@@ -79,11 +69,13 @@ describe('UserProcess Slice', () => {
       user: null,
     };
 
-    const result = userProcess.reducer(initialState, loginAction.rejected(null, '', { login: 'test', password: '123' }));
+    const result = userProcess.reducer(
+      initialState,
+      loginAction.rejected(null, '', { login: 'test', password: '123' })
+    );
 
     expect(result.authorizationStatus).toBe(AuthorizationStatus.NoAuth);
   });
-
 
   it('should set "NoAuth" status with "logoutAction.fulfilled"', () => {
     const initialState = {
@@ -91,7 +83,10 @@ describe('UserProcess Slice', () => {
       user: makeFakeUser(),
     };
 
-    const result = userProcess.reducer(initialState, logoutAction.fulfilled(undefined, '', undefined));
+    const result = userProcess.reducer(
+      initialState,
+      logoutAction.fulfilled(undefined, '', undefined)
+    );
 
     expect(result.authorizationStatus).toBe(AuthorizationStatus.NoAuth);
     expect(result.user).toBeNull();

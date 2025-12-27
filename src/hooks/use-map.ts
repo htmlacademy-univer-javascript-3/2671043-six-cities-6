@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { City } from '../types/offer';
 import { Map, TileLayer } from 'leaflet';
-import { MAP_ATTRIBUTION, MAP_URL_TEMPLATE } from '../const';
+import { MapConfig } from '../const';
+
 type MapProps = {
   renderRef: React.RefObject<HTMLDivElement>;
   city: City;
@@ -9,10 +10,13 @@ type MapProps = {
 
 export const useMap = ({ renderRef, city }: MapProps) => {
   const [map, setMap] = useState<Map | null>(null);
-  const mapRef = useRef(false);
+  const isRenderedRef = useRef(false);
+
   useEffect(() => {
-    if (renderRef.current && !mapRef.current) {
-      const instance = new Map(renderRef.current, {
+    let instance: Map | null = null;
+
+    if (renderRef.current && !isRenderedRef.current) {
+      instance = new Map(renderRef.current, {
         center: {
           lat: city.location.latitude,
           lng: city.location.longitude,
@@ -20,13 +24,37 @@ export const useMap = ({ renderRef, city }: MapProps) => {
         zoom: city.location.zoom,
       });
 
-      const layer = new TileLayer(MAP_URL_TEMPLATE, {
-        attribution: MAP_ATTRIBUTION,
+      const layer = new TileLayer(MapConfig.MapUrlTemplate, {
+        attribution: MapConfig.MapAttribution,
       });
+
       instance.addLayer(layer);
       setMap(instance);
-      mapRef.current = true;
+      isRenderedRef.current = true;
     }
-  }, [city, renderRef]);
+
+    return () => {
+      if (instance) {
+        instance.remove();
+        setMap(null);
+        isRenderedRef.current = false;
+      }
+    };
+    //в зависимости не добавлен city, для корретной работы (чтобы не удалял экземпляр карты при смене города)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [renderRef]);
+
+  useEffect(() => {
+    if (map) {
+      map.setView(
+        {
+          lat: city.location.latitude,
+          lng: city.location.longitude,
+        },
+        city.location.zoom
+      );
+    }
+  }, [map, city]);
+
   return map;
 };

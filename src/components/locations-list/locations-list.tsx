@@ -16,7 +16,7 @@ export const LocationsList = memo(({ cityActive, onCityChange }: LocationsListPr
             href="#"
             onClick={(evt) => {
               evt.preventDefault();
-              onCityChange(city); 
+              onCityChange(city);
             }}
           >
             <span>{city}</span>

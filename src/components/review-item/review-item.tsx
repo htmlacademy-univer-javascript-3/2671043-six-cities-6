@@ -1,3 +1,4 @@
+import { RATING_MULTIPLIER } from '../../const';
 import { Review } from '../../types/review';
 
 type ReviewItemProps = {
@@ -9,7 +10,7 @@ export const ReviewItem = ({ review }: ReviewItemProps) => {
   const { user, rating, comment, date } = review;
 
 
-  const ratingWidth = Math.round(rating) * 20;
+  const ratingWidth = Math.round(rating) * RATING_MULTIPLIER;
   const dateText = new Date(date).toLocaleString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -23,7 +24,7 @@ export const ReviewItem = ({ review }: ReviewItemProps) => {
             src={user.avatarUrl}
             width="54"
             height="54"
-            alt="Reviews avatar"
+            alt={user.name}
           />
         </div>
         <span className="reviews__user-name">{user.name}</span>

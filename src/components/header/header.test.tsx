@@ -7,7 +7,7 @@ import thunk from 'redux-thunk';
 import { Header } from './header';
 import { AuthorizationStatus, NameSpace } from '../../const';
 import { logoutAction } from '../../store/api-actions';
-import { AnyAction } from 'redux'; // Импорт для типизации (опционально)
+import { AnyAction } from 'redux';
 
 const middlewares = [thunk];
 const mockStore = configureMockStore(middlewares);
@@ -36,7 +36,9 @@ describe('Component: Header', () => {
     await userEvent.click(screen.getByText('Sign out'));
 
     const actions = store.getActions();
-    const actionsTypes = actions.map((action: AnyAction) => action.type as string);
+    const actionsTypes = actions.map(
+      (action: AnyAction) => action.type as string
+    );
 
     expect(actionsTypes).toContain(logoutAction.pending.type);
   });

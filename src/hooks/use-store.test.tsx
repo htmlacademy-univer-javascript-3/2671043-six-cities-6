@@ -2,11 +2,11 @@ import { renderHook } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureMockStore } from '@jedmao/redux-mock-store';
 import { useAppDispatch, useAppSelector } from './use-store';
-import { NameSpace } from '../const'; // Или где у тебя лежат неймспейсы
-import { State } from '../types/state'; // Твой тип стейта
+import { NameSpace } from '../const';
+import { State } from '../types/state';
 import { Action } from 'redux';
 
-// Создаем моковый стор
+
 const mockStore = configureMockStore<State, Action>();
 
 describe('Hooks: useAppDispatch & useAppSelector', () => {

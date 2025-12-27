@@ -6,11 +6,9 @@ import thunk from 'redux-thunk';
 import { OfferPage } from './offer-page';
 import { NameSpace, AuthorizationStatus } from '../../const';
 
-
 vi.mock('../../components/map-offers/map-offers', () => ({
-  MapOffers: () => <div data-testid="map-offers" />
+  MapOffers: () => <div data-testid="map-offers" />,
 }));
-
 
 window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
 
@@ -31,7 +29,7 @@ const mockFullOffer = {
   goods: ['Wi-Fi'],
   host: { name: 'Host', avatarUrl: '', isPro: true },
   city: { name: 'Paris', location: { latitude: 0, longitude: 0, zoom: 10 } },
-  location: { latitude: 0, longitude: 0, zoom: 10 }
+  location: { latitude: 0, longitude: 0, zoom: 10 },
 };
 
 describe('Page: OfferPage', () => {
@@ -43,11 +41,11 @@ describe('Page: OfferPage', () => {
         comments: [],
         isOfferLoading: false,
         hasError: false,
-        favorites: [] // Для Header
+        favorites: [],
       },
       [NameSpace.User]: {
         authorizationStatus: AuthorizationStatus.Auth,
-        user: { email: 'test@test.ru' }
+        user: { email: 'test@test.ru' },
       },
       [NameSpace.App]: { error: null },
     });
